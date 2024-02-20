@@ -522,6 +522,24 @@ class RouteTest extends TestCase
         }
     }
 
+    /** @test **/
+    public function a_route_can_contain_multiple_localized_segments(): void
+    {
+        $this->registerTestTranslations();
+
+        Route::multilingual('foo/{param}/bar')->name('test');
+
+        $this->assertEquals(
+            url('foo-en/1/bar-en'),
+            localized_route('test', [1])
+        );
+
+        $this->assertEquals(
+            url('fr/foo-fr/1/bar-fr'),
+            localized_route('test', [1], 'fr')
+        );
+    }
+
     protected function registerTestRoute(): MultilingualRoutePendingRegistration
     {
         $this->registerTestTranslations();
@@ -559,10 +577,14 @@ class RouteTest extends TestCase
             'en' => [
                 'routes.prefix/test' => 'prefix/test',
                 'routes.test' => 'test',
+                'routes.foo' => 'foo-en',
+                'routes.bar' => 'bar-en',
             ],
             'fr' => [
                 'routes.prefix/test' => 'prefixe/teste',
                 'routes.test' => 'teste',
+                'routes.foo' => 'foo-fr',
+                'routes.bar' => 'bar-fr',
             ],
         ]);
     }

@@ -289,9 +289,20 @@ class MultilingualRegistrar
             return $this->shouldNotPrefixHome($locale) ? '/' : "/{$locale}";
         }
 
-        return Lang::has("routes.{$key}", $locale)
-            ? trans("routes.{$key}", [], $locale)
-            : $key;
+        if (Lang::has("routes.{$key}", $locale)) {
+            return trans("routes.{$key}", [], $locale);
+        }
+
+        if (str_contains($key, '/')) {
+            return implode('/', array_map(
+                fn ($segment) => Lang::has("routes.{$segment}", $locale)
+                    ? trans("routes.{$segment}", [], $locale)
+                    : $segment,
+                explode('/', $key)
+            ));
+        }
+
+        return $key;
     }
 
     /**
