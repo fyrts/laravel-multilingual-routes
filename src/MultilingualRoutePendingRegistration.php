@@ -212,7 +212,7 @@ class MultilingualRoutePendingRegistration
      * @param  string|null  $locale
      * @return $this
      */
-    public function where($name, ?string $expression = null, string $locale = null): self
+    public function where($name, ?string $expression = null, ?string $locale = null): self
     {
         $key = rtrim("constraints-$locale", '-');
 
