@@ -3,18 +3,15 @@
 namespace ChinLeung\MultilingualRoutes;
 
 use Closure;
-use Symfony\Component\HttpFoundation\Request;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class DetectRequestLocale
 {
     /**
      * Handle an incoming request.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Closure  $next
-     * @return mixed
      */
-    public function handle(Request $request, Closure $next)
+    public function handle(Request $request, Closure $next): Response
     {
         $segment = $request->locale ?: $request->segment(1);
 
