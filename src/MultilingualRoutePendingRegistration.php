@@ -205,6 +205,14 @@ class MultilingualRoutePendingRegistration
     }
 
     /**
+     * Indicates that the request should be a POST request.
+     */
+    public function post(): self
+    {
+        return $this->method('post');
+    }
+
+    /**
      * Set a regular expression requirement on the route.
      *
      * @param  array|string  $name
