@@ -12,7 +12,7 @@ if (! function_exists('current_route')) {
      * @param  bool  $absolute
      * @return string
      */
-    function current_route(string $locale = null, string $fallback = null, bool $absolute = true): string
+    function current_route(?string $locale = null, ?string $fallback = null, bool $absolute = true): string
     {
         if (is_null($fallback)) {
             $fallback = url(request()->server('REQUEST_URI'));
@@ -51,7 +51,7 @@ if (! function_exists('localized_route')) {
      * @param  bool  $absolute
      * @return string
      */
-    function localized_route(string $name, $parameters = [], string $locale = null, bool $absolute = true): string
+    function localized_route(string $name, $parameters = [], ?string $locale = null, bool $absolute = true): string
     {
         if (! in_array($locale, locales())) {
             $locale = locale();
