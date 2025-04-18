@@ -164,6 +164,10 @@ class RouteTest extends TestCase
             ->method('post')
             ->register();
 
+        $routes = collect($routes)->reject(function ($route) {
+            return $route->getName() === 'storage.local';
+        });
+
         foreach ($routes as $route) {
             $this->assertContains(
                 'POST',
@@ -195,6 +199,8 @@ class RouteTest extends TestCase
                     'fr',
                     app()->getLocale()
                 );
+
+                return response()->noContent();
             }
         );
     }
@@ -534,7 +540,11 @@ class RouteTest extends TestCase
     {
         Route::multilingual('/')->middleware('web');
 
-        foreach (Route::getRoutes() as $route) {
+        $routes = collect(Route::getRoutes())->reject(function ($route) {
+            return $route->getName() === 'storage.local';
+        });
+
+        foreach ($routes as $route) {
             $this->assertContains('web', data_get($route, 'action.middleware'));
         }
     }
