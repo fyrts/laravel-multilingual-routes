@@ -114,19 +114,19 @@ class MultilingualResourcePendingRegistration
 
         foreach ($resourceActions as $action => $config) {
             [$method, $suffix] = $config;
-            
+
             $paramName = $this->options['parameters'][$this->resourceName] ?? $this->resourceName;
-            $routeKey = $this->resourceName . str_replace('{id}', '{' . $paramName . '}', $suffix);
-            
+            $routeKey = $this->resourceName.str_replace('{id}', '{'.$paramName.'}', $suffix);
+
             $actionNames = $this->getActionNames($action);
             $options = array_merge($this->options, [
                 'name' => $this->getActionName($action),
             ]);
-            
-            if (!empty($actionNames)) {
+
+            if (! empty($actionNames)) {
                 $options['names'] = $actionNames;
             }
-            
+
             $lastRoutes = $this->registrar->redirect(
                 $routeKey,
                 $this->destination,
@@ -151,21 +151,21 @@ class MultilingualResourcePendingRegistration
 
         foreach ($resourceActions as $action => $config) {
             [$method, $suffix] = $config;
-            
+
             $paramName = $this->options['parameters'][$this->resourceName] ?? $this->resourceName;
-            $routeKey = $this->resourceName . str_replace('{id}', '{' . $paramName . '}', $suffix);
-            
+            $routeKey = $this->resourceName.str_replace('{id}', '{'.$paramName.'}', $suffix);
+
             $actionNames = $this->getActionNames($action);
             $options = array_merge($this->options, [
                 'method' => strtolower($method),
                 'name' => $this->getActionName($action),
             ]);
-            
-            if (!empty($actionNames)) {
+
+            if (! empty($actionNames)) {
                 $options['names'] = $actionNames;
             }
 
-            // Apply whereParam constraints  
+            // Apply whereParam constraints
             if (isset($this->options['whereParams'])) {
                 $options['constraints'] = array_merge(
                     $options['constraints'] ?? [],
@@ -182,10 +182,10 @@ class MultilingualResourcePendingRegistration
             if (isset($this->options['missing'])) {
                 $options['missing'] = $this->options['missing'];
             }
-            
+
             $lastRoutes = $this->registrar->register(
                 $routeKey,
-                $this->controller . '@' . $action,
+                $this->controller.'@'.$action,
                 $this->options['locales'] ?? $this->locales,
                 $options
             );
@@ -215,10 +215,10 @@ class MultilingualResourcePendingRegistration
         $except = $this->options['except'] ?? [];
 
         // Filter actions based on only/except options
-        if (!empty($only)) {
+        if (! empty($only)) {
             $resourceActions = array_intersect_key($resourceActions, array_flip($only));
         }
-        if (!empty($except)) {
+        if (! empty($except)) {
             $resourceActions = array_diff_key($resourceActions, array_flip($except));
         }
 
@@ -234,7 +234,8 @@ class MultilingualResourcePendingRegistration
     protected function getActionName(string $action): string
     {
         $baseName = $this->options['name'] ?? $this->resourceName;
-        return $baseName . '.' . $action;
+
+        return $baseName.'.'.$action;
     }
 
     /**
@@ -245,13 +246,13 @@ class MultilingualResourcePendingRegistration
      */
     protected function getActionNames(string $action): array
     {
-        if (!isset($this->options['names'])) {
+        if (! isset($this->options['names'])) {
             return [];
         }
 
         $actionNames = [];
         foreach ($this->options['names'] as $locale => $name) {
-            $actionNames[$locale] = $name . '.' . $action;
+            $actionNames[$locale] = $name.'.'.$action;
         }
 
         return $actionNames;
@@ -292,7 +293,7 @@ class MultilingualResourcePendingRegistration
     public function except($actions): self
     {
         $this->options['except'] = array_merge(
-            $this->options['except'] ?? [], 
+            $this->options['except'] ?? [],
             Arr::wrap($actions)
         );
 
@@ -449,10 +450,10 @@ class MultilingualResourcePendingRegistration
      */
     public function whereParam(string $param, string $constraint): self
     {
-        if (!isset($this->options['whereParams'])) {
+        if (! isset($this->options['whereParams'])) {
             $this->options['whereParams'] = [];
         }
-        
+
         $this->options['whereParams'][$param] = $constraint;
 
         return $this;
@@ -499,4 +500,4 @@ class MultilingualResourcePendingRegistration
             $this->register();
         }
     }
-} 
+}

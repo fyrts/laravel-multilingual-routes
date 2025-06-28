@@ -3,8 +3,8 @@
 namespace ChinLeung\MultilingualRoutes\Macros;
 
 use ChinLeung\MultilingualRoutes\MultilingualRegistrar;
-use ChinLeung\MultilingualRoutes\MultilingualRoutePendingRegistration;
 use ChinLeung\MultilingualRoutes\MultilingualResourcePendingRegistration;
+use ChinLeung\MultilingualRoutes\MultilingualRoutePendingRegistration;
 use Closure;
 
 class RouterMacros
@@ -72,6 +72,4 @@ class RouterMacros
             return $this->has($names);
         };
     }
-
-
 }

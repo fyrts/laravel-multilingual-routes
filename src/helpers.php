@@ -71,17 +71,17 @@ if (! function_exists('current_route_is')) {
     function current_route_is($name): bool
     {
         $route = Route::getCurrentRoute();
-    
+
         if (! $route) {
             return false;
         }
-    
+
         $current_name = Str::replaceFirst(
             locale().'.',
             '',
             $route->getName()
         );
-    
+
         return $current_name === $name;
     }
 }

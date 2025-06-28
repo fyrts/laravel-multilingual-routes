@@ -40,10 +40,10 @@ class ResourceTest extends TestCase
             foreach ($expectedRoutes as $action => $config) {
                 $routeName = "{$locale}.photos.{$action}";
                 $this->assertTrue(Route::has($routeName), "Route {$routeName} should exist");
-                
+
                 $route = Route::getRoutes()->getByName($routeName);
                 $this->assertNotNull($route, "Route {$routeName} should not be null");
-                
+
                 [$method] = $config;
                 $this->assertContains(strtoupper($method), $route->methods, "Route {$routeName} should have {$method} method");
             }
@@ -75,7 +75,7 @@ class ResourceTest extends TestCase
             // Check that only index and show exist
             $this->assertTrue(Route::has("{$locale}.photos.index"));
             $this->assertTrue(Route::has("{$locale}.photos.show"));
-            
+
             // Check that the others don't exist
             $this->assertFalse(Route::has("{$locale}.photos.create"));
             $this->assertFalse(Route::has("{$locale}.photos.store"));
@@ -94,7 +94,7 @@ class ResourceTest extends TestCase
             // Check that create and edit don't exist
             $this->assertFalse(Route::has("{$locale}.photos.create"));
             $this->assertFalse(Route::has("{$locale}.photos.edit"));
-            
+
             // Check that the others exist
             $this->assertTrue(Route::has("{$locale}.photos.index"));
             $this->assertTrue(Route::has("{$locale}.photos.store"));
@@ -108,19 +108,19 @@ class ResourceTest extends TestCase
     public function a_multilingual_resource_can_have_custom_parameter_names(): void
     {
         Route::multilingualResource('photos', 'PhotoController')->parameters([
-            'photos' => 'photo_id'
+            'photos' => 'photo_id',
         ]);
 
         foreach (locales() as $locale) {
             $showRoute = Route::getRoutes()->getByName("{$locale}.photos.show");
             $this->assertStringContainsString('{photo_id}', $showRoute->uri);
-            
+
             $editRoute = Route::getRoutes()->getByName("{$locale}.photos.edit");
             $this->assertStringContainsString('{photo_id}', $editRoute->uri);
-            
+
             $updateRoute = Route::getRoutes()->getByName("{$locale}.photos.update");
             $this->assertStringContainsString('{photo_id}', $updateRoute->uri);
-            
+
             $destroyRoute = Route::getRoutes()->getByName("{$locale}.photos.destroy");
             $this->assertStringContainsString('{photo_id}', $destroyRoute->uri);
         }
@@ -194,7 +194,7 @@ class ResourceTest extends TestCase
             $this->assertTrue(Route::has("{$locale}.gallery.index"));
             $this->assertTrue(Route::has("{$locale}.gallery.show"));
             $this->assertTrue(Route::has("{$locale}.gallery.create"));
-            
+
             // Original name should not exist
             $this->assertFalse(Route::has("{$locale}.photos.index"));
         }
@@ -248,12 +248,12 @@ class ResourceTest extends TestCase
     {
         Route::multilingualResource('photos', 'PhotoController')->names([
             'en' => 'pictures',
-            'fr' => 'images'
+            'fr' => 'images',
         ]);
 
         $this->assertTrue(Route::has('en.pictures.index'));
         $this->assertTrue(Route::has('fr.images.index'));
-        
+
         // Original names should not exist
         $this->assertFalse(Route::has('en.photos.index'));
         $this->assertFalse(Route::has('fr.photos.index'));
@@ -263,9 +263,10 @@ class ResourceTest extends TestCase
     public function a_multilingual_resource_can_use_missing_callback(): void
     {
         $callbackExecuted = false;
-        
+
         Route::multilingualResource('photos', 'PhotoController')->missing(function () use (&$callbackExecuted) {
             $callbackExecuted = true;
+
             return response('Custom 404', 404);
         });
 
@@ -284,11 +285,11 @@ class ResourceTest extends TestCase
         foreach (locales() as $locale) {
             $showRoute = Route::getRoutes()->getByName("{$locale}.photos.show");
             $editRoute = Route::getRoutes()->getByName("{$locale}.photos.edit");
-            
+
             // These routes should have withTrashed enabled
             $this->assertTrue(data_get($showRoute, 'action.withTrashed', false));
             $this->assertTrue(data_get($editRoute, 'action.withTrashed', false));
-            
+
             // Index route should not have withTrashed
             $indexRoute = Route::getRoutes()->getByName("{$locale}.photos.index");
             $this->assertFalse(data_get($indexRoute, 'action.withTrashed', false));
@@ -323,21 +324,21 @@ class ResourceTest extends TestCase
         $this->assertTrue(Route::has('fr.gallery.show'));
         $this->assertTrue(Route::has('fr.gallery.edit'));
         $this->assertFalse(Route::has('en.gallery.index'));
-        
+
         // Check that excluded actions don't exist
         $this->assertFalse(Route::has('fr.gallery.create'));
         $this->assertFalse(Route::has('fr.gallery.store'));
-        
+
         // Check parameter name
         $showRoute = Route::getRoutes()->getByName('fr.gallery.show');
         $this->assertStringContainsString('{photo_id}', $showRoute->uri);
-        
+
         // Check constraints
         $this->assertEquals('[0-9]+', data_get($showRoute, 'wheres.photos'));
-        
+
         // Check middleware
         $this->assertContains('auth', data_get($showRoute, 'action.middleware', []));
-        
+
         // Check withTrashed
         $this->assertTrue(data_get($showRoute, 'action.withTrashed', false));
     }
@@ -349,4 +350,4 @@ class ResourceTest extends TestCase
             MultilingualRoutesServiceProvider::class,
         ];
     }
-} 
+}
