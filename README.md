@@ -90,6 +90,42 @@ return [
 ];
 ```
 
+**Important for Resource Routes:** When using `multilingualResource`, don't forget to add translations for all resource route segments that contain parameters:
+
+```php
+Route::multilingualResource('test', 'TestController');
+```
+
+```php
+<?php
+
+// resources/lang/fr/routes.php
+
+return [
+   'test' => 'teste',
+   'test/{test}' => 'teste/{test}'
+];
+```
+
+This will generate the following:
+
+| Method    | URI                        | Name              | Action                                    |
+|-----------|----------------------------|-------------------|-------------------------------------------|
+| GET\|HEAD | test                       | en.test.index     | App\Http\Controllers\TestController@index |
+| GET\|HEAD | test/create                | en.test.create    | App\Http\Controllers\TestController@create |
+| POST      | test                       | en.test.store     | App\Http\Controllers\TestController@store |
+| GET\|HEAD | test/{test}                | en.test.show      | App\Http\Controllers\TestController@show |
+| GET\|HEAD | test/{test}/edit           | en.test.edit      | App\Http\Controllers\TestController@edit |
+| PUT       | test/{test}                | en.test.update    | App\Http\Controllers\TestController@update |
+| DELETE    | test/{test}                | en.test.destroy   | App\Http\Controllers\TestController@destroy |
+| GET\|HEAD | fr/teste                   | fr.test.index     | App\Http\Controllers\TestController@index |
+| GET\|HEAD | fr/teste/create            | fr.test.create    | App\Http\Controllers\TestController@create |
+| POST      | fr/teste                   | fr.test.store     | App\Http\Controllers\TestController@store |
+| GET\|HEAD | fr/teste/{test}            | fr.test.show      | App\Http\Controllers\TestController@show |
+| GET\|HEAD | fr/teste/{test}/edit       | fr.test.edit      | App\Http\Controllers\TestController@edit |
+| PUT       | fr/teste/{test}            | fr.test.update    | App\Http\Controllers\TestController@update |
+| DELETE    | fr/teste/{test}            | fr.test.destroy   | App\Http\Controllers\TestController@destroy |
+
 To retrieve a route, you can use the `localized_route(string $name, array $parameters, string $locale = null, bool $absolute = true)` instead of the `route` helper:
 
 ```php
