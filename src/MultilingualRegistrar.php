@@ -223,6 +223,15 @@ class MultilingualRegistrar
             $route->setBindingFields($bindingFields);
         }
 
+        // Apply Laravel 12.x resource features
+        if (isset($options['missing'])) {
+            $route->action['missing'] = $options['missing'];
+        }
+
+        if (isset($options['withTrashed']) && $options['withTrashed'] === true) {
+            $route->action['withTrashed'] = true;
+        }
+
         return $route;
     }
 

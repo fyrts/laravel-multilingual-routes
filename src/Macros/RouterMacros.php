@@ -4,6 +4,7 @@ namespace ChinLeung\MultilingualRoutes\Macros;
 
 use ChinLeung\MultilingualRoutes\MultilingualRegistrar;
 use ChinLeung\MultilingualRoutes\MultilingualRoutePendingRegistration;
+use ChinLeung\MultilingualRoutes\MultilingualResourcePendingRegistration;
 use Closure;
 
 class RouterMacros
@@ -41,59 +42,16 @@ class RouterMacros
     public function multilingualResource(): Closure
     {
         return function ($key, $controller, array $options = []) {
-            $locales = $options['locales'] ?? locales();
-            $except = $options['except'] ?? [];
-            $only = $options['only'] ?? [];
-            $parameters = $options['parameters'] ?? [];
+            $registrar = $this->container && $this->container->bound(MultilingualRegistrar::class)
+                ? $this->container->make(MultilingualRegistrar::class)
+                : new MultilingualRegistrar($this);
 
-            $resourceActions = [
-                'index' => ['GET', ''],
-                'create' => ['GET', '/create'],
-                'store' => ['POST', ''],
-                'show' => ['GET', '/{id}'],
-                'edit' => ['GET', '/{id}/edit'],
-                'update' => ['PUT', '/{id}'],
-                'destroy' => ['DELETE', '/{id}'],
-            ];
-
-            // Filter actions based on only/except options
-            if (!empty($only)) {
-                $resourceActions = array_intersect_key($resourceActions, array_flip($only));
-            }
-            if (!empty($except)) {
-                $resourceActions = array_diff_key($resourceActions, array_flip($except));
-            }
-
-            $allRoutes = [];
-
-            // Register each resource action as separate multilingual routes
-            foreach ($resourceActions as $action => $config) {
-                [$method, $suffix] = $config;
-                
-                // Customize parameter name
-                $paramName = $parameters[$key] ?? $key;
-                $routeKey = $key . str_replace('{id}', '{' . $paramName . '}', $suffix);
-                
-                // Create multilingual route using existing logic
-                $registrar = $this->container && $this->container->bound(MultilingualRegistrar::class)
-                    ? $this->container->make(MultilingualRegistrar::class)
-                    : new MultilingualRegistrar($this);
-
-                $registration = new MultilingualRoutePendingRegistration(
-                    $registrar,
-                    $routeKey,
-                    $controller . '@' . $action,
-                    $locales
-                );
-
-                $registration->method(strtolower($method))
-                    ->name($key . '.' . $action);
-
-                $routes = $registration->register();
-                $allRoutes[] = $routes;
-            }
-
-            return $allRoutes;
+            return new MultilingualResourcePendingRegistration(
+                $registrar,
+                $key,
+                $controller,
+                $options['locales'] ?? locales()
+            )->options($options);
         };
     }
 

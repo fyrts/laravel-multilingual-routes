@@ -246,33 +246,85 @@ This will generate all the standard resource routes for each configured locale:
 #### Limiting resource routes to specific actions
 
 ```php
-Route::multilingualResource('photos', 'PhotoController', [
-    'only' => ['index', 'show']
-]);
+Route::multilingualResource('photos', 'PhotoController')->only(['index', 'show']);
 ```
 
 #### Excluding specific actions
 
 ```php
-Route::multilingualResource('photos', 'PhotoController', [
-    'except' => ['create', 'edit']
-]);
+Route::multilingualResource('photos', 'PhotoController')->except(['create', 'edit']);
 ```
 
 #### Custom parameter names
 
 ```php
-Route::multilingualResource('photos', 'PhotoController', [
-    'parameters' => ['photos' => 'photo_id']
+Route::multilingualResource('photos', 'PhotoController')->parameters([
+    'photos' => 'photo_id'
 ]);
 ```
 
 #### Limiting to specific locales
 
 ```php
-Route::multilingualResource('photos', 'PhotoController', [
-    'locales' => ['en', 'fr']
+Route::multilingualResource('photos', 'PhotoController')->onlyLocales(['fr']);
+Route::multilingualResource('photos', 'PhotoController')->exceptLocales(['en']);
+```
+
+#### Laravel 12.x Resource Features
+
+All Laravel 12.x resource route features are supported:
+
+```php
+// Customize missing model behavior
+Route::multilingualResource('photos', 'PhotoController')
+    ->missing(function (Request $request) {
+        return Redirect::route('photos.index');
+    });
+
+// Include soft deleted models
+Route::multilingualResource('photos', 'PhotoController')->withTrashed(['show']);
+
+// Apply constraints to specific parameters
+Route::multilingualResource('photos', 'PhotoController')->whereParam('photos', '[0-9]+');
+```
+
+#### Using chainable methods
+
+Like regular multilingual routes, you can chain all the same methods:
+
+```php
+// Set custom name
+Route::multilingualResource('photos', 'PhotoController')->name('gallery');
+
+// Add middleware
+Route::multilingualResource('photos', 'PhotoController')->middleware(['auth', 'verified']);
+
+// Add route constraints
+Route::multilingualResource('photos', 'PhotoController')->where('photos', '[0-9]+');
+
+// Set default parameters
+Route::multilingualResource('photos', 'PhotoController')->defaults(['format' => 'json']);
+
+// Exclude specific locales
+Route::multilingualResource('photos', 'PhotoController')->exceptLocales(['en']);
+
+// Set different names per locale
+Route::multilingualResource('photos', 'PhotoController')->names([
+    'en' => 'pictures',
+    'fr' => 'images'
 ]);
+
+// Chain multiple methods together
+Route::multilingualResource('photos', 'PhotoController')
+    ->only(['index', 'show', 'edit'])
+    ->exceptLocales(['en'])
+    ->name('gallery')
+    ->middleware('auth')
+    ->parameters(['photos' => 'photo_id'])
+    ->withTrashed(['show'])
+    ->missing(function (Request $request) {
+        return redirect()->route('gallery.index');
+    });
 ```
 
 ## Upgrading from 1.x to 2.x

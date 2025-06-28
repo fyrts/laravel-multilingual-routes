@@ -69,9 +69,7 @@ class ResourceTest extends TestCase
     /** @test **/
     public function a_multilingual_resource_can_be_limited_to_specific_actions(): void
     {
-        Route::multilingualResource('photos', 'PhotoController', [
-            'only' => ['index', 'show']
-        ]);
+        Route::multilingualResource('photos', 'PhotoController')->only(['index', 'show']);
 
         foreach (locales() as $locale) {
             // Check that only index and show exist
@@ -90,9 +88,7 @@ class ResourceTest extends TestCase
     /** @test **/
     public function a_multilingual_resource_can_exclude_specific_actions(): void
     {
-        Route::multilingualResource('photos', 'PhotoController', [
-            'except' => ['create', 'edit']
-        ]);
+        Route::multilingualResource('photos', 'PhotoController')->except(['create', 'edit']);
 
         foreach (locales() as $locale) {
             // Check that create and edit don't exist
@@ -111,8 +107,8 @@ class ResourceTest extends TestCase
     /** @test **/
     public function a_multilingual_resource_can_have_custom_parameter_names(): void
     {
-        Route::multilingualResource('photos', 'PhotoController', [
-            'parameters' => ['photos' => 'photo_id']
+        Route::multilingualResource('photos', 'PhotoController')->parameters([
+            'photos' => 'photo_id'
         ]);
 
         foreach (locales() as $locale) {
@@ -133,9 +129,7 @@ class ResourceTest extends TestCase
     /** @test **/
     public function a_multilingual_resource_can_be_limited_to_specific_locales(): void
     {
-        Route::multilingualResource('photos', 'PhotoController', [
-            'locales' => ['fr']
-        ]);
+        Route::multilingualResource('photos', 'PhotoController')->onlyLocales(['fr']);
 
         // Check that only French routes exist
         $this->assertTrue(Route::has('fr.photos.index'));
@@ -189,6 +183,163 @@ class ResourceTest extends TestCase
         }
 
         return $this;
+    }
+
+    /** @test **/
+    public function a_multilingual_resource_can_use_name_method(): void
+    {
+        Route::multilingualResource('photos', 'PhotoController')->name('gallery');
+
+        foreach (locales() as $locale) {
+            $this->assertTrue(Route::has("{$locale}.gallery.index"));
+            $this->assertTrue(Route::has("{$locale}.gallery.show"));
+            $this->assertTrue(Route::has("{$locale}.gallery.create"));
+            
+            // Original name should not exist
+            $this->assertFalse(Route::has("{$locale}.photos.index"));
+        }
+    }
+
+    /** @test **/
+    public function a_multilingual_resource_can_use_middleware(): void
+    {
+        Route::multilingualResource('photos', 'PhotoController')->middleware('auth');
+
+        foreach (locales() as $locale) {
+            $route = Route::getRoutes()->getByName("{$locale}.photos.index");
+            $this->assertContains('auth', data_get($route, 'action.middleware', []));
+        }
+    }
+
+    /** @test **/
+    public function a_multilingual_resource_can_use_where_constraints(): void
+    {
+        Route::multilingualResource('photos', 'PhotoController')->where('photos', '[0-9]+');
+
+        foreach (locales() as $locale) {
+            $route = Route::getRoutes()->getByName("{$locale}.photos.show");
+            $this->assertEquals('[0-9]+', data_get($route, 'wheres.photos'));
+        }
+    }
+
+    /** @test **/
+    public function a_multilingual_resource_can_use_defaults(): void
+    {
+        Route::multilingualResource('photos', 'PhotoController')->defaults(['format' => 'json']);
+
+        foreach (locales() as $locale) {
+            $route = Route::getRoutes()->getByName("{$locale}.photos.index");
+            $this->assertEquals('json', data_get($route, 'defaults.format'));
+        }
+    }
+
+    /** @test **/
+    public function a_multilingual_resource_can_exclude_locales(): void
+    {
+        Route::multilingualResource('photos', 'PhotoController')->exceptLocales(['en']);
+
+        // Check that only French routes exist
+        $this->assertTrue(Route::has('fr.photos.index'));
+        $this->assertFalse(Route::has('en.photos.index'));
+    }
+
+    /** @test **/
+    public function a_multilingual_resource_can_use_names_array(): void
+    {
+        Route::multilingualResource('photos', 'PhotoController')->names([
+            'en' => 'pictures',
+            'fr' => 'images'
+        ]);
+
+        $this->assertTrue(Route::has('en.pictures.index'));
+        $this->assertTrue(Route::has('fr.images.index'));
+        
+        // Original names should not exist
+        $this->assertFalse(Route::has('en.photos.index'));
+        $this->assertFalse(Route::has('fr.photos.index'));
+    }
+
+    /** @test **/
+    public function a_multilingual_resource_can_use_missing_callback(): void
+    {
+        $callbackExecuted = false;
+        
+        Route::multilingualResource('photos', 'PhotoController')->missing(function () use (&$callbackExecuted) {
+            $callbackExecuted = true;
+            return response('Custom 404', 404);
+        });
+
+        // Check that routes exist with the missing callback option
+        foreach (locales() as $locale) {
+            $route = Route::getRoutes()->getByName("{$locale}.photos.show");
+            $this->assertNotNull(data_get($route, 'action.missing'));
+        }
+    }
+
+    /** @test **/
+    public function a_multilingual_resource_can_use_with_trashed(): void
+    {
+        Route::multilingualResource('photos', 'PhotoController')->withTrashed(['show', 'edit']);
+
+        foreach (locales() as $locale) {
+            $showRoute = Route::getRoutes()->getByName("{$locale}.photos.show");
+            $editRoute = Route::getRoutes()->getByName("{$locale}.photos.edit");
+            
+            // These routes should have withTrashed enabled
+            $this->assertTrue(data_get($showRoute, 'action.withTrashed', false));
+            $this->assertTrue(data_get($editRoute, 'action.withTrashed', false));
+            
+            // Index route should not have withTrashed
+            $indexRoute = Route::getRoutes()->getByName("{$locale}.photos.index");
+            $this->assertFalse(data_get($indexRoute, 'action.withTrashed', false));
+        }
+    }
+
+    /** @test **/
+    public function a_multilingual_resource_can_use_where_param(): void
+    {
+        Route::multilingualResource('photos', 'PhotoController')->whereParam('photos', '[0-9]+');
+
+        foreach (locales() as $locale) {
+            $route = Route::getRoutes()->getByName("{$locale}.photos.show");
+            $this->assertEquals('[0-9]+', data_get($route, 'wheres.photos'));
+        }
+    }
+
+    /** @test **/
+    public function a_multilingual_resource_can_chain_multiple_methods(): void
+    {
+        Route::multilingualResource('photos', 'PhotoController')
+            ->only(['index', 'show', 'edit'])
+            ->exceptLocales(['en'])
+            ->name('gallery')
+            ->middleware('auth')
+            ->where('photos', '[0-9]+')
+            ->parameters(['photos' => 'photo_id'])
+            ->withTrashed(['show']);
+
+        // Check that only French routes exist
+        $this->assertTrue(Route::has('fr.gallery.index'));
+        $this->assertTrue(Route::has('fr.gallery.show'));
+        $this->assertTrue(Route::has('fr.gallery.edit'));
+        $this->assertFalse(Route::has('en.gallery.index'));
+        
+        // Check that excluded actions don't exist
+        $this->assertFalse(Route::has('fr.gallery.create'));
+        $this->assertFalse(Route::has('fr.gallery.store'));
+        
+        // Check parameter name
+        $showRoute = Route::getRoutes()->getByName('fr.gallery.show');
+        $this->assertStringContainsString('{photo_id}', $showRoute->uri);
+        
+        // Check constraints
+        $this->assertEquals('[0-9]+', data_get($showRoute, 'wheres.photos'));
+        
+        // Check middleware
+        $this->assertContains('auth', data_get($showRoute, 'action.middleware', []));
+        
+        // Check withTrashed
+        $this->assertTrue(data_get($showRoute, 'action.withTrashed', false));
     }
 
     protected function getPackageProviders($app)
