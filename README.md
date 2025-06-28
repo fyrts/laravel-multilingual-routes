@@ -216,6 +216,65 @@ URL::signedLocalizedRoute('unsubscribe', ['user' => 1]);
 URL::temporarySignedLocalizedRoute('unsubscribe', now()->addMinutes(30), ['user' => 1]);
 ```
 
+### Multilingual Resource Routes
+
+You can also register multilingual resource routes using the `multilingualResource` method:
+
+```php
+Route::multilingualResource('photos', 'PhotoController');
+```
+
+This will generate all the standard resource routes for each configured locale:
+
+| Method    | URI                        | Name              | Action                                    |
+|-----------|----------------------------|-------------------|-------------------------------------------|
+| GET\|HEAD | photos                     | en.photos.index   | App\Http\Controllers\PhotoController@index |
+| GET\|HEAD | photos/create              | en.photos.create  | App\Http\Controllers\PhotoController@create |
+| POST      | photos                     | en.photos.store   | App\Http\Controllers\PhotoController@store |
+| GET\|HEAD | photos/{photo}             | en.photos.show    | App\Http\Controllers\PhotoController@show |
+| GET\|HEAD | photos/{photo}/edit        | en.photos.edit    | App\Http\Controllers\PhotoController@edit |
+| PUT       | photos/{photo}             | en.photos.update  | App\Http\Controllers\PhotoController@update |
+| DELETE    | photos/{photo}             | en.photos.destroy | App\Http\Controllers\PhotoController@destroy |
+| GET\|HEAD | fr/photos                  | fr.photos.index   | App\Http\Controllers\PhotoController@index |
+| GET\|HEAD | fr/photos/create           | fr.photos.create  | App\Http\Controllers\PhotoController@create |
+| POST      | fr/photos                  | fr.photos.store   | App\Http\Controllers\PhotoController@store |
+| GET\|HEAD | fr/photos/{photo}          | fr.photos.show    | App\Http\Controllers\PhotoController@show |
+| GET\|HEAD | fr/photos/{photo}/edit     | fr.photos.edit    | App\Http\Controllers\PhotoController@edit |
+| PUT       | fr/photos/{photo}          | fr.photos.update  | App\Http\Controllers\PhotoController@update |
+| DELETE    | fr/photos/{photo}          | fr.photos.destroy | App\Http\Controllers\PhotoController@destroy |
+
+#### Limiting resource routes to specific actions
+
+```php
+Route::multilingualResource('photos', 'PhotoController', [
+    'only' => ['index', 'show']
+]);
+```
+
+#### Excluding specific actions
+
+```php
+Route::multilingualResource('photos', 'PhotoController', [
+    'except' => ['create', 'edit']
+]);
+```
+
+#### Custom parameter names
+
+```php
+Route::multilingualResource('photos', 'PhotoController', [
+    'parameters' => ['photos' => 'photo_id']
+]);
+```
+
+#### Limiting to specific locales
+
+```php
+Route::multilingualResource('photos', 'PhotoController', [
+    'locales' => ['en', 'fr']
+]);
+```
+
 ## Upgrading from 1.x to 2.x
 
 To update from 1.x to 2.x, you simply have to rename the namespace occurrences in your application from `LaravelMultilingualRoutes` to `MultilingualRoutes`. The most common use case would be the `DetectRequestLocale` middleware.
