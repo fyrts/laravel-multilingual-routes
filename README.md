@@ -106,6 +106,13 @@ current_route('fr'); // Returns the current request's route in French version
 current_route('fr', route('fallback')); // Returns the fallback route if the current route is not registered in French
 ```
 
+To check if the current route matches a specific route name (without locale prefix), you can use the `current_route_is(string $name)` helper:
+
+```php
+current_route_is('home'); // Returns true if current route is 'en.home', 'fr.home', etc.
+current_route_is('photos.show'); // Returns true if current route is 'en.photos.show', 'fr.photos.show', etc.
+```
+
 ### Renaming the routes
 
 ```php
