@@ -3,6 +3,7 @@
 namespace ChinLeung\MultilingualRoutes\Macros;
 
 use ChinLeung\MultilingualRoutes\MultilingualRegistrar;
+use ChinLeung\MultilingualRoutes\MultilingualResourcePendingRegistration;
 use ChinLeung\MultilingualRoutes\MultilingualRoutePendingRegistration;
 use Closure;
 
@@ -27,6 +28,30 @@ class RouterMacros
                 $handle,
                 $locales ?: locales()
             );
+        };
+    }
+
+    /**
+     * Register multilingual resource routes.
+     *
+     * @param  string  $key
+     * @param  string  $controller
+     * @param  array  $options
+     * @return \Closure
+     */
+    public function multilingualResource(): Closure
+    {
+        return function ($key, $controller, array $options = []) {
+            $registrar = $this->container && $this->container->bound(MultilingualRegistrar::class)
+                ? $this->container->make(MultilingualRegistrar::class)
+                : new MultilingualRegistrar($this);
+
+            return new MultilingualResourcePendingRegistration(
+                $registrar,
+                $key,
+                $controller,
+                $options['locales'] ?? locales()
+            )->options($options);
         };
     }
 

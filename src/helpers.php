@@ -60,3 +60,28 @@ if (! function_exists('localized_route')) {
         return route("$locale.$name", $parameters, $absolute);
     }
 }
+
+if (! function_exists('current_route_is')) {
+    /**
+     * Check if the current route is the given name.
+     *
+     * @param  string  $name
+     * @return bool Returns true if the current route is the given name, false otherwise.
+     */
+    function current_route_is($name): bool
+    {
+        $route = Route::getCurrentRoute();
+
+        if (! $route) {
+            return false;
+        }
+
+        $current_name = Str::replaceFirst(
+            locale().'.',
+            '',
+            $route->getName()
+        );
+
+        return $current_name === $name;
+    }
+}

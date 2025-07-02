@@ -90,6 +90,42 @@ return [
 ];
 ```
 
+**Important for Resource Routes:** When using `multilingualResource`, don't forget to add translations for all resource route segments that contain parameters:
+
+```php
+Route::multilingualResource('test', 'TestController');
+```
+
+```php
+<?php
+
+// resources/lang/fr/routes.php
+
+return [
+   'test' => 'teste',
+   'test/{test}' => 'teste/{test}'
+];
+```
+
+This will generate the following:
+
+| Method    | URI                        | Name              | Action                                    |
+|-----------|----------------------------|-------------------|-------------------------------------------|
+| GET\|HEAD | test                       | en.test.index     | App\Http\Controllers\TestController@index |
+| GET\|HEAD | test/create                | en.test.create    | App\Http\Controllers\TestController@create |
+| POST      | test                       | en.test.store     | App\Http\Controllers\TestController@store |
+| GET\|HEAD | test/{test}                | en.test.show      | App\Http\Controllers\TestController@show |
+| GET\|HEAD | test/{test}/edit           | en.test.edit      | App\Http\Controllers\TestController@edit |
+| PUT       | test/{test}                | en.test.update    | App\Http\Controllers\TestController@update |
+| DELETE    | test/{test}                | en.test.destroy   | App\Http\Controllers\TestController@destroy |
+| GET\|HEAD | fr/teste                   | fr.test.index     | App\Http\Controllers\TestController@index |
+| GET\|HEAD | fr/teste/create            | fr.test.create    | App\Http\Controllers\TestController@create |
+| POST      | fr/teste                   | fr.test.store     | App\Http\Controllers\TestController@store |
+| GET\|HEAD | fr/teste/{test}            | fr.test.show      | App\Http\Controllers\TestController@show |
+| GET\|HEAD | fr/teste/{test}/edit       | fr.test.edit      | App\Http\Controllers\TestController@edit |
+| PUT       | fr/teste/{test}            | fr.test.update    | App\Http\Controllers\TestController@update |
+| DELETE    | fr/teste/{test}            | fr.test.destroy   | App\Http\Controllers\TestController@destroy |
+
 To retrieve a route, you can use the `localized_route(string $name, array $parameters, string $locale = null, bool $absolute = true)` instead of the `route` helper:
 
 ```php
@@ -104,6 +140,13 @@ To retrieve the current route in another locale, you can use the `current_route(
 current_route(); // Returns the current request's route
 current_route('fr'); // Returns the current request's route in French version
 current_route('fr', route('fallback')); // Returns the fallback route if the current route is not registered in French
+```
+
+To check if the current route matches a specific route name (without locale prefix), you can use the `current_route_is(string $name)` helper:
+
+```php
+current_route_is('home'); // Returns true if current route is 'en.home', 'fr.home', etc.
+current_route_is('photos.show'); // Returns true if current route is 'en.photos.show', 'fr.photos.show', etc.
 ```
 
 ### Renaming the routes
@@ -214,6 +257,117 @@ Request::localizedRouteIs('home');
 ```php
 URL::signedLocalizedRoute('unsubscribe', ['user' => 1]);
 URL::temporarySignedLocalizedRoute('unsubscribe', now()->addMinutes(30), ['user' => 1]);
+```
+
+### Multilingual Resource Routes
+
+You can also register multilingual resource routes using the `multilingualResource` method:
+
+```php
+Route::multilingualResource('photos', 'PhotoController');
+```
+
+This will generate all the standard resource routes for each configured locale:
+
+| Method    | URI                        | Name              | Action                                    |
+|-----------|----------------------------|-------------------|-------------------------------------------|
+| GET\|HEAD | photos                     | en.photos.index   | App\Http\Controllers\PhotoController@index |
+| GET\|HEAD | photos/create              | en.photos.create  | App\Http\Controllers\PhotoController@create |
+| POST      | photos                     | en.photos.store   | App\Http\Controllers\PhotoController@store |
+| GET\|HEAD | photos/{photo}             | en.photos.show    | App\Http\Controllers\PhotoController@show |
+| GET\|HEAD | photos/{photo}/edit        | en.photos.edit    | App\Http\Controllers\PhotoController@edit |
+| PUT       | photos/{photo}             | en.photos.update  | App\Http\Controllers\PhotoController@update |
+| DELETE    | photos/{photo}             | en.photos.destroy | App\Http\Controllers\PhotoController@destroy |
+| GET\|HEAD | fr/photos                  | fr.photos.index   | App\Http\Controllers\PhotoController@index |
+| GET\|HEAD | fr/photos/create           | fr.photos.create  | App\Http\Controllers\PhotoController@create |
+| POST      | fr/photos                  | fr.photos.store   | App\Http\Controllers\PhotoController@store |
+| GET\|HEAD | fr/photos/{photo}          | fr.photos.show    | App\Http\Controllers\PhotoController@show |
+| GET\|HEAD | fr/photos/{photo}/edit     | fr.photos.edit    | App\Http\Controllers\PhotoController@edit |
+| PUT       | fr/photos/{photo}          | fr.photos.update  | App\Http\Controllers\PhotoController@update |
+| DELETE    | fr/photos/{photo}          | fr.photos.destroy | App\Http\Controllers\PhotoController@destroy |
+
+#### Limiting resource routes to specific actions
+
+```php
+Route::multilingualResource('photos', 'PhotoController')->only(['index', 'show']);
+```
+
+#### Excluding specific actions
+
+```php
+Route::multilingualResource('photos', 'PhotoController')->except(['create', 'edit']);
+```
+
+#### Custom parameter names
+
+```php
+Route::multilingualResource('photos', 'PhotoController')->parameters([
+    'photos' => 'photo_id'
+]);
+```
+
+#### Limiting to specific locales
+
+```php
+Route::multilingualResource('photos', 'PhotoController')->onlyLocales(['fr']);
+Route::multilingualResource('photos', 'PhotoController')->exceptLocales(['en']);
+```
+
+#### Laravel 12.x Resource Features
+
+All Laravel 12.x resource route features are supported:
+
+```php
+// Customize missing model behavior
+Route::multilingualResource('photos', 'PhotoController')
+    ->missing(function (Request $request) {
+        return Redirect::route('photos.index');
+    });
+
+// Include soft deleted models
+Route::multilingualResource('photos', 'PhotoController')->withTrashed(['show']);
+
+// Apply constraints to specific parameters
+Route::multilingualResource('photos', 'PhotoController')->whereParam('photos', '[0-9]+');
+```
+
+#### Using chainable methods
+
+Like regular multilingual routes, you can chain all the same methods:
+
+```php
+// Set custom name
+Route::multilingualResource('photos', 'PhotoController')->name('gallery');
+
+// Add middleware
+Route::multilingualResource('photos', 'PhotoController')->middleware(['auth', 'verified']);
+
+// Add route constraints
+Route::multilingualResource('photos', 'PhotoController')->where('photos', '[0-9]+');
+
+// Set default parameters
+Route::multilingualResource('photos', 'PhotoController')->defaults(['format' => 'json']);
+
+// Exclude specific locales
+Route::multilingualResource('photos', 'PhotoController')->exceptLocales(['en']);
+
+// Set different names per locale
+Route::multilingualResource('photos', 'PhotoController')->names([
+    'en' => 'pictures',
+    'fr' => 'images'
+]);
+
+// Chain multiple methods together
+Route::multilingualResource('photos', 'PhotoController')
+    ->only(['index', 'show', 'edit'])
+    ->exceptLocales(['en'])
+    ->name('gallery')
+    ->middleware('auth')
+    ->parameters(['photos' => 'photo_id'])
+    ->withTrashed(['show'])
+    ->missing(function (Request $request) {
+        return redirect()->route('gallery.index');
+    });
 ```
 
 ## Upgrading from 1.x to 2.x
