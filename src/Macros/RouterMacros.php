@@ -46,19 +46,23 @@ class RouterMacros
                 ? $this->container->make(MultilingualRegistrar::class)
                 : new MultilingualRegistrar($this);
 
-            return new MultilingualResourcePendingRegistration(
+            $resource = new MultilingualResourcePendingRegistration(
                 $registrar,
                 $key,
                 $controller,
                 $options['locales'] ?? locales()
-            )->options($options);
+            );
+
+            $resource->options($options);
+
+            return $resource;
         };
     }
 
     /**
      * Check if a route with the given name exists for the current locale.
      *
-     * @param  string|array  $name
+     * @param  array|string  $name
      * @return \Closure
      */
     public function hasLocalized(): Closure
