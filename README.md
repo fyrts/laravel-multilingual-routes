@@ -23,15 +23,14 @@ You can install the package via composer:
 composer require chinleung/laravel-multilingual-routes
 ```
 
-To detect and change the locale of the application based on the request automatically, you can add the middleware to your `app/Http/Kernel`. It must be the first item in the `web` middleware group.
+To detect and change the locale of the application based on the request automatically, you can add the middleware to your `bootstrap/app.php`. It must be the first item in the `web` middleware group.
 
 ``` php
-protected $middlewareGroups = [
-    'web' => [
-        \ChinLeung\MultilingualRoutes\DetectRequestLocale::class,
-        // ...
+$middleware->web(
+    prepend: [
+        DetectRequestLocale::class,
     ]
-];
+); 
 ```
 
 ## Configuration
