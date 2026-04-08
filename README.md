@@ -10,6 +10,7 @@ A package to register multilingual routes for your application.
 
 | Version  | Laravel Version |
 | ------------- | ------------- |
+| v6 | 13.x  |
 | v5 | 12.x  |
 | v4 | 10.x, 11.x  |
 | v3  | 9.x  |
