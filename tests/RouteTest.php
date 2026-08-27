@@ -164,10 +164,10 @@ class RouteTest extends TestCase
             ->method('post')
             ->register();
 
-        foreach ($routes as $route) {
+        foreach (locales() as $locale) {
             $this->assertContains(
                 'POST',
-                $route->methods
+                $routes->getByName("{$locale}.test")->methods
             );
         }
     }
@@ -532,10 +532,16 @@ class RouteTest extends TestCase
     /** @test **/
     public function a_route_can_be_registered_with_a_middleware(): void
     {
-        Route::multilingual('/')->middleware('web');
+        $routes = Route::multilingual('/')
+            ->middleware('web')
+            ->name('home')
+            ->register();
 
-        foreach (Route::getRoutes() as $route) {
-            $this->assertContains('web', data_get($route, 'action.middleware'));
+        foreach (locales() as $locale) {
+            $this->assertContains(
+                'web',
+                data_get($routes->getByName("{$locale}.home"), 'action.middleware')
+            );
         }
     }
 
